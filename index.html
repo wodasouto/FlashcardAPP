@@ -374,6 +374,9 @@ const GITHUB_OWNER = 'wodasouto';
 const GITHUB_REPO = 'FlashcardAPP';
 const GITHUB_DECKS_PATH = 'Decks';
 
+// Detecta se é iOS
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
 // ══════════════════════════════════════
 //  STORAGE
 // ══════════════════════════════════════
@@ -710,15 +713,49 @@ function speakFront() {
   const text = deck[queue[cursor]].front;
   window.speechSynthesis.cancel();
   const utt = new SpeechSynthesisUtterance(text);
+  
+  // Carrega vozes disponíveis
   const voices = window.speechSynthesis.getVoices();
-  const jaVoice = voices.find(v => v.lang.startsWith('ja'));
-  if (jaVoice) utt.voice = jaVoice;
+  
+  // Tenta encontrar uma voz japonesa natural (não-Google se possível)
+  let selectedVoice = voices.find(v => v.lang.startsWith('ja') && !v.name.includes('Google'));
+  if (!selectedVoice) {
+    selectedVoice = voices.find(v => v.lang.startsWith('ja'));
+  }
+  
+  if (selectedVoice) {
+    utt.voice = selectedVoice;
+  }
+  
   utt.lang = 'ja-JP';
-  utt.rate = 0.9;
+  
+  // Ajusta taxa conforme o dispositivo
+  if (isIOS) {
+    utt.rate = 0.8;  // iPhone - um pouco mais rápido, pois iOS é naturalmente mais lento
+    utt.pitch = 1.1; // Tom ligeiramente mais alto para melhor clareza
+  } else {
+    utt.rate = 0.85;  // Desktop/Android - moderado
+    utt.pitch = 1.0;  // Tom normal
+  }
+  
+  utt.volume = 1.0;  // Volume máximo
+  
   const btn = document.getElementById('btn-speak');
   btn.classList.add('speaking');
   utt.onend = () => btn.classList.remove('speaking');
+  utt.onerror = (event) => {
+    console.error('Erro na síntese de voz:', event.error);
+    btn.classList.remove('speaking');
+  };
+  
   window.speechSynthesis.speak(utt);
+}
+
+// Carrega vozes quando estiverem prontas
+if (window.speechSynthesis) {
+  window.speechSynthesis.addEventListener('voiceschanged', () => {
+    window.speechSynthesis.getVoices();
+  });
 }
 
 document.getElementById('btn-speak').addEventListener('click', e => {
