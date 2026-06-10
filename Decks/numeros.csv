@@ -6,5 +6,54 @@ go;cinco (五) — ご
 roku;seis (六) — ろく
 nana;sete (七) — なな
 hachi;oito (八) — はち
-ku / kyuu;nove (九) — く / きゅう
-juu;dez (十) — じゅう
+kyuu;nove (九) — く / きゅう
+juu;10 | じゅう
+nijuu;20 | にじゅう
+sanjuu;30 | さんじゅう
+yonjuu;40 | よんじゅう
+gojuu;50 | ごじゅう
+rokujuu;60 | ろくじゅう
+nanajuu;70 | ななじゅう
+hachijuu;80 | はちじゅう
+kyuujuu;90 | きゅうじゅう
+hyaku;100 | ひゃく
+hyaku;100 | ひゃく
+nihyaku;200 | にひゃく
+sanbyaku;300 | さんびゃく
+yonhyaku;400 | よんひゃく
+gohyaku;500 | ごひゃく
+roppyaku;600 | ろっぴゃく
+nanahyaku;700 | ななひゃく
+happyaku;800 | はっぴゃく
+kyuuhyaku;900 | きゅうひゃく
+sen;1000 | せん
+nisen;2000 | にせん
+sanzen;3000 | さんぜん
+yonsen;4000 | よんせん
+gosen;5000 | ごせん
+rokusen;6000 | ろくせん
+nanasen;7000 | ななせん
+hassen;8000 | はっせん
+kyuusen;9000 | きゅうせん
+ichiman;10000 | いちまん
+hyakujuuichi;111 | ひゃくじゅういち
+nihyakunijuuni;222 | にひゃくにじゅうに
+nihyakujuukyuu;219 | にひゃくじゅうきゅう
+nihyakurokujuuichi;261 | にひゃくろくじゅういち
+sanbyakugojuuni;352 | さんびゃくごじゅうに
+sanbyakuhachijuuroku;386 | さんびゃくはちじゅうろく
+yonhyakukyuujuuhachi;498 | よんひゃくきゅうじゅうはち
+gohyakuyonjuuni;542 | ごひゃくよんじゅうに
+nanahyakunanajuunana;777 | ななひゃくななじゅうなな
+nanahyakuhachijuuyon;784 | ななひゃくはちじゅうよん
+sennihyakusanjuuyon;1234 | せんにひゃくさんじゅうよん
+senhappyakukyuujuuni;1892 | せんはっぴゃくきゅうじゅうに
+nisenyonjuugo;2045 | にせんよんじゅうご
+nisengohyakurokujuuhachi;2568 | にせんごひゃくろくじゅうはち
+sanzennihyakayjuugo;3225 | さんぜんにひゃくにじゅうご
+sanzengohyakunijuugo;3525 | さんぜんごひゃくにじゅうご
+yonsenhyakuhachijuusan;4183 | よんせんひゃくはちじゅうさん
+gosenrokujuukyuu;5069 | ごせんろくじゅうきゅう
+rokusennanahyakuyonjuuni;6742 | ろくせんななひゃくよんじゅうに
+hassensanbyakukyuujuugo;8395 | はっせんさんびゃくきゅうじゅうご
+kyuusennijuuichi;9021 | きゅうせんにじゅういち
