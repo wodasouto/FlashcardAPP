@@ -340,6 +340,33 @@ header {
 #btn-speak-front:hover { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.25); }
 #btn-speak-front.speaking { border-color:var(--torii); background:rgba(192,57,43,.15); }
 
+/* barra de revisão rápida */
+#quick-review-bar {
+  display:none; width:100%; margin-top:14px;
+  flex-direction:column; gap:8px;
+}
+#quick-review-bar.visible { display:flex; }
+.qr-row { display:flex; gap:8px; }
+.qr-btn {
+  flex:1; border:none; border-radius:50px;
+  font-family:'Inter',sans-serif; font-size:.72rem; font-weight:600;
+  padding:9px 10px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  transition:background .18s, transform .1s;
+}
+.qr-btn:active { transform:scale(.96); }
+.qr-btn .qr-icon { font-size:.95rem; }
+.qr-btn .qr-count {
+  font-size:.65rem; font-weight:700; opacity:.7;
+  background:rgba(0,0,0,.15); border-radius:20px; padding:1px 6px;
+}
+#qr-no  { background:rgba(192,57,43,.16); color:#f5c6c1; border:1px solid rgba(192,57,43,.4); }
+#qr-no:hover  { background:rgba(192,57,43,.28); }
+#qr-yes { background:rgba(45,106,79,.18); color:#a8d5b9; border:1px solid rgba(45,106,79,.45); }
+#qr-yes:hover { background:rgba(45,106,79,.32); }
+#qr-restart { background:rgba(255,255,255,.07); color:var(--paper); border:1px solid rgba(255,255,255,.15); }
+#qr-restart:hover { background:rgba(255,255,255,.13); }
+
 /* import button */
 #import-btn {
   display:inline-flex; align-items:center; gap:6px;
@@ -456,6 +483,23 @@ header {
 
   <!-- botão de som abaixo do botão central -->
   <button id="btn-speak-front" style="display:none;">🔊</button>
+
+  <!-- revisão rápida mid-deck -->
+  <div id="quick-review-bar">
+    <div class="qr-row">
+      <button class="qr-btn" id="qr-no">
+        <span class="qr-icon">✗</span> Revisar não sei <span class="qr-count" id="qr-no-count">0</span>
+      </button>
+      <button class="qr-btn" id="qr-yes">
+        <span class="qr-icon">✓</span> Revisar já sei <span class="qr-count" id="qr-yes-count">0</span>
+      </button>
+    </div>
+    <div class="qr-row">
+      <button class="qr-btn" id="qr-restart">
+        <span class="qr-icon">↺</span> Reiniciar deck
+      </button>
+    </div>
+  </div>
 
   <div id="state-done">
     <div class="big">🎌</div>
@@ -711,7 +755,7 @@ function handleFiles(files) {
 //  STUDY STATE
 // ══════════════════════════════════════
 let activeFolderIdx = -1;
-let deck=[], queue=[], cursor=0, known=0, unknown=0, noList=[], flipped=false;
+let deck=[], queue=[], cursor=0, known=0, unknown=0, noList=[], yesList=[], flipped=false;
 let typeChecked = false;
 
 let activeTags = new Set(); // tags selecionadas (vazio = todas)
@@ -860,10 +904,11 @@ function syncOptButtons() {
 // ══════════════════════════════════════
 function startRound(indices) {
   queue  = opts.shuffle ? shuffle([...indices]) : [...indices];
-  cursor = 0; known = 0; unknown = 0; noList = [];
+  cursor = 0; known = 0; unknown = 0; noList = []; yesList = [];
   updateStats(0,0);
   document.getElementById('state-done').classList.remove('visible');
   showStudyWidgets(true);
+  updateQuickReview();
   showCard();
 }
 
@@ -872,6 +917,7 @@ function showStudyWidgets(on) {
   document.getElementById('actions').style.display     = on ? '' : 'none';
   document.getElementById('deck-bar').style.display    = on ? '' : 'none';
   document.getElementById('type-area').classList.toggle('visible', false);
+  if (!on) document.getElementById('quick-review-bar').classList.remove('visible');
 }
 
 function showCard() {
@@ -1083,6 +1129,7 @@ function checkType() {
     document.getElementById('type-feedback').textContent = '✓ Correto!';
     document.getElementById('type-feedback').style.color = '#a8d5b9';
     typeChecked = 'yes';
+    yesList.push(queue[cursor]);
     known++; updateStats(known, unknown);
     if (opts.srs) srsUpdate(activeFolderIdx, queue[cursor], true);
     if (opts.sound) speakFront();
@@ -1097,6 +1144,7 @@ function checkType() {
     if (opts.srs) srsUpdate(activeFolderIdx, queue[cursor], false);
     if (opts.sound) speakFront();
   }
+  updateQuickReview();
   document.getElementById('btn-type-check').textContent = 'Próximo · Enter';
 }
 
@@ -1116,13 +1164,40 @@ document.getElementById('type-input').addEventListener('keydown', e => {
 document.getElementById('btn-no').addEventListener('click', () => {
   noList.push(queue[cursor]); unknown++; updateStats(known,unknown);
   if (opts.srs) srsUpdate(activeFolderIdx, queue[cursor], false);
+  updateQuickReview();
   advanceCard(false);
 });
 
 document.getElementById('btn-yes').addEventListener('click', () => {
-  known++; updateStats(known,unknown);
+  yesList.push(queue[cursor]); known++; updateStats(known,unknown);
   if (opts.srs) srsUpdate(activeFolderIdx, queue[cursor], true);
+  updateQuickReview();
   advanceCard(true);
+});
+
+// ══════════════════════════════════════
+//  QUICK REVIEW BAR
+// ══════════════════════════════════════
+function updateQuickReview() {
+  const bar = document.getElementById('quick-review-bar');
+  const hasAny = noList.length > 0 || yesList.length > 0;
+  bar.classList.toggle('visible', hasAny);
+  document.getElementById('qr-no-count').textContent  = noList.length;
+  document.getElementById('qr-yes-count').textContent = yesList.length;
+  document.getElementById('qr-no').style.opacity  = noList.length  > 0 ? '1' : '.35';
+  document.getElementById('qr-yes').style.opacity = yesList.length > 0 ? '1' : '.35';
+  document.getElementById('qr-no').style.pointerEvents  = noList.length  > 0 ? '' : 'none';
+  document.getElementById('qr-yes').style.pointerEvents = yesList.length > 0 ? '' : 'none';
+}
+
+document.getElementById('qr-no').addEventListener('click', () => {
+  if (noList.length) startRound([...noList]);
+});
+document.getElementById('qr-yes').addEventListener('click', () => {
+  if (yesList.length) startRound([...yesList]);
+});
+document.getElementById('qr-restart').addEventListener('click', () => {
+  startRound(getFilteredIndices());
 });
 
 // ══════════════════════════════════════
