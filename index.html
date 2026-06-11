@@ -33,8 +33,8 @@ body {
 /* ── Header ── */
 header {
   width: 100%; max-width: 720px;
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 28px;
+  display: flex; flex-direction: column; align-items: flex-start;
+  margin-bottom: 28px; gap: 8px;
 }
 .app-title { font-family:'Noto Sans JP',sans-serif; font-size:1.05rem; font-weight:600; letter-spacing:.06em; opacity:.9; }
 .app-title span { color:var(--torii); }
@@ -130,6 +130,7 @@ header {
   color:var(--paper); font-family:'Inter',sans-serif; font-size:.75rem; font-weight:500;
   padding:7px 13px; border-radius:8px; cursor:pointer;
   transition:background .18s; user-select:none; width:100%;
+  -webkit-tap-highlight-color: transparent;
 }
 #tag-trigger:hover { background:var(--panelb); }
 #tag-trigger .t-arrow { font-size:.6rem; opacity:.4; margin-left:auto; transition:transform .2s; }
@@ -146,6 +147,7 @@ header {
   display:flex; align-items:center; gap:10px;
   padding:8px 10px; border-radius:8px; cursor:pointer;
   font-size:.78rem; transition:background .15s; user-select:none;
+  -webkit-tap-highlight-color: transparent;
 }
 .tag-opt:hover { background:var(--panelb); }
 .tag-opt .t-check {
@@ -257,9 +259,9 @@ header {
 #btn-type-check:hover { background:rgba(255,255,255,.15); }
 
 /* action buttons */
-#actions { width:100%; display:flex; gap:12px; }
+#actions { width:100%; display:flex; gap:12px; align-items:center; }
 .action-btn {
-  flex:1; border:none; border-radius:12px;
+  border:none; border-radius:12px;
   font-family:'Inter',sans-serif; font-size:.8rem; font-weight:600; letter-spacing:.04em;
   padding:13px 8px; cursor:pointer;
   transition:transform .12s,background .18s;
@@ -267,12 +269,34 @@ header {
 }
 .action-btn:active { transform:scale(.96); }
 .action-btn .icon { font-size:1.25rem; }
-#btn-no   { background:rgba(192,57,43,.15); color:#f5c6c1; border:1px solid rgba(192,57,43,.4); }
-#btn-no:hover { background:rgba(192,57,43,.28); }
-#btn-flip { background:rgba(255,255,255,.08); color:var(--paper); border:1px solid rgba(255,255,255,.18); flex:1.2; }
+
+/* ✗ Não sei — círculo vermelho */
+#btn-no {
+  width:62px; height:62px; border-radius:50%; flex:none;
+  background:var(--torii); color:#fff; border:none;
+  font-size:1.5rem; padding:0;
+  box-shadow:0 4px 16px rgba(192,57,43,.45);
+  display:flex; align-items:center; justify-content:center;
+}
+#btn-no .icon { font-size:1.5rem; margin:0; }
+#btn-no span:not(.icon) { display:none; }
+#btn-no:hover { background:#a93226; }
+
+/* Ver resposta — retangular no centro */
+#btn-flip { background:rgba(255,255,255,.08); color:var(--paper); border:1px solid rgba(255,255,255,.18); flex:1; }
 #btn-flip:hover { background:rgba(255,255,255,.14); }
-#btn-yes  { background:rgba(45,106,79,.2); color:#a8d5b9; border:1px solid rgba(45,106,79,.45); }
-#btn-yes:hover { background:rgba(45,106,79,.35); }
+
+/* ✓ Já sei — círculo verde */
+#btn-yes {
+  width:62px; height:62px; border-radius:50%; flex:none;
+  background:var(--moss); color:#fff; border:none;
+  font-size:1.5rem; padding:0;
+  box-shadow:0 4px 16px rgba(45,106,79,.45);
+  display:flex; align-items:center; justify-content:center;
+}
+#btn-yes .icon { font-size:1.5rem; margin:0; }
+#btn-yes span:not(.icon) { display:none; }
+#btn-yes:hover { background:#1e4d38; }
 
 /* done state */
 #state-done { display:none; flex-direction:column; align-items:center; text-align:center; gap:14px; margin-top:20px; }
@@ -305,6 +329,7 @@ header {
   padding:12px 16px; cursor:pointer; user-select:none;
   font-size:.82rem; font-weight:600; opacity:.85;
   transition:background .18s;
+  -webkit-tap-highlight-color: transparent;
 }
 #github-decks-header:hover { background:var(--panelb); }
 #github-arrow { font-size:.65rem; opacity:.45; transition:transform .25s; }
@@ -512,14 +537,25 @@ async function loadGitHubDecks() {
     loading.style.display = 'none';
     error.style.display = 'none';
 
-    // Toggle dropdown abrir/fechar
+    // Toggle dropdown abrir/fechar — compatível com iOS Safari
     const header = document.getElementById('github-decks-header');
     const body   = document.getElementById('github-decks-body');
     const arrow  = document.getElementById('github-arrow');
-    header.onclick = () => {
-      body.classList.toggle('open');
-      arrow.classList.toggle('open');
-    };
+
+    function toggleGithubDropdown(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = body.classList.contains('open');
+      if (isOpen) {
+        body.classList.remove('open');
+        arrow.classList.remove('open');
+      } else {
+        body.classList.add('open');
+        arrow.classList.add('open');
+      }
+    }
+    header.addEventListener('click', toggleGithubDropdown);
+    header.addEventListener('touchend', toggleGithubDropdown, { passive: false });
 
     csvFiles.forEach(file => {
       const card = document.createElement('div');
@@ -729,6 +765,7 @@ function buildTagFilter() {
   allOpt.dataset.tag = '__all__';
   allOpt.innerHTML = `<span class="t-check"></span><span class="t-name">Todas as tags</span><span class="t-count">${deck.length}</span>`;
   allOpt.addEventListener('click', e => { e.stopPropagation(); toggleTag('__all__'); });
+  allOpt.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); toggleTag('__all__'); }, { passive: false });
   dd.appendChild(allOpt);
 
   tags.forEach(tag => {
@@ -738,20 +775,34 @@ function buildTagFilter() {
     opt.dataset.tag = tag;
     opt.innerHTML = `<span class="t-check"></span><span class="t-name">${esc(tag)}</span><span class="t-count">${count}</span>`;
     opt.addEventListener('click', e => { e.stopPropagation(); toggleTag(tag); });
+    opt.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); toggleTag(tag); }, { passive: false });
     dd.appendChild(opt);
   });
 
-  // Toggle dropdown
-  trig.addEventListener('click', e => {
+  // Toggle dropdown — compatível com iOS Safari
+  function toggleTagDropdown(e) {
+    e.preventDefault();
     e.stopPropagation();
-    trig.classList.toggle('open');
-    dd.classList.toggle('open');
-  });
-  document.addEventListener('click', () => {
+    const isOpen = dd.classList.contains('open');
+    if (isOpen) {
+      trig.classList.remove('open');
+      dd.classList.remove('open');
+    } else {
+      trig.classList.add('open');
+      dd.classList.add('open');
+    }
+  }
+  trig.addEventListener('click', toggleTagDropdown);
+  trig.addEventListener('touchend', toggleTagDropdown, { passive: false });
+
+  function closeTagDropdown() {
     trig.classList.remove('open');
     dd.classList.remove('open');
-  });
+  }
+  document.addEventListener('click', closeTagDropdown);
+  document.addEventListener('touchend', closeTagDropdown, { passive: true });
   dd.addEventListener('click', e => e.stopPropagation());
+  dd.addEventListener('touchend', e => e.stopPropagation(), { passive: true });
 
   updateTagPreview();
 }
