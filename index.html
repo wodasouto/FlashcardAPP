@@ -261,42 +261,21 @@ header {
 /* action buttons */
 #actions { width:100%; display:flex; gap:12px; align-items:center; }
 .action-btn {
-  border:none; border-radius:12px;
-  font-family:'Inter',sans-serif; font-size:.8rem; font-weight:600; letter-spacing:.04em;
-  padding:13px 8px; cursor:pointer;
-  transition:transform .12s,background .18s;
-  display:flex; flex-direction:column; align-items:center; gap:5px;
+  flex:1; border:none; border-radius:50px;
+  font-family:'Inter',sans-serif; font-size:.82rem; font-weight:600; letter-spacing:.04em;
+  padding:14px 12px; cursor:pointer;
+  transition:transform .12s, background .18s;
+  display:flex; flex-direction:row; align-items:center; justify-content:center; gap:8px;
 }
 .action-btn:active { transform:scale(.96); }
-.action-btn .icon { font-size:1.25rem; }
+.action-btn .icon { font-size:1.1rem; }
 
-/* ✗ Não sei — círculo vermelho */
-#btn-no {
-  width:62px; height:62px; border-radius:50%; flex:none;
-  background:var(--torii); color:#fff; border:none;
-  font-size:1.5rem; padding:0;
-  box-shadow:0 4px 16px rgba(192,57,43,.45);
-  display:flex; align-items:center; justify-content:center;
-}
-#btn-no .icon { font-size:1.5rem; margin:0; }
-#btn-no span:not(.icon) { display:none; }
-#btn-no:hover { background:#a93226; }
-
-/* Ver resposta — retangular no centro */
-#btn-flip { background:rgba(255,255,255,.08); color:var(--paper); border:1px solid rgba(255,255,255,.18); flex:1; }
+#btn-no   { background:rgba(192,57,43,.18); color:#f5c6c1; border:1px solid rgba(192,57,43,.45); }
+#btn-no:hover { background:rgba(192,57,43,.30); }
+#btn-flip { background:rgba(255,255,255,.08); color:var(--paper); border:1px solid rgba(255,255,255,.18); }
 #btn-flip:hover { background:rgba(255,255,255,.14); }
-
-/* ✓ Já sei — círculo verde */
-#btn-yes {
-  width:62px; height:62px; border-radius:50%; flex:none;
-  background:var(--moss); color:#fff; border:none;
-  font-size:1.5rem; padding:0;
-  box-shadow:0 4px 16px rgba(45,106,79,.45);
-  display:flex; align-items:center; justify-content:center;
-}
-#btn-yes .icon { font-size:1.5rem; margin:0; }
-#btn-yes span:not(.icon) { display:none; }
-#btn-yes:hover { background:#1e4d38; }
+#btn-yes  { background:rgba(45,106,79,.22); color:#a8d5b9; border:1px solid rgba(45,106,79,.5); }
+#btn-yes:hover { background:rgba(45,106,79,.36); }
 
 /* done state */
 #state-done { display:none; flex-direction:column; align-items:center; text-align:center; gap:14px; margin-top:20px; }
