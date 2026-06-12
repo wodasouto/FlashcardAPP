@@ -107,6 +107,7 @@ header {
   border-radius:14px; padding:18px 18px 14px;
   cursor:pointer; transition:background .18s,border-color .18s,transform .12s;
   position:relative; display:flex; flex-direction:column; gap:6px;
+  -webkit-tap-highlight-color: transparent; user-select:none;
 }
 .folder-card:hover { background:var(--panelb); border-color:rgba(255,255,255,.16); transform:translateY(-2px); }
 .folder-icon { font-size:1.5rem; }
@@ -321,6 +322,8 @@ header {
   background:var(--panelb); border:1px solid rgba(255,255,255,.08);
   border-radius:9px; padding:9px 12px; cursor:pointer;
   transition:background .18s, border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 .github-deck-card:hover { background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.18); }
 .github-deck-card.loading { opacity:.5; pointer-events:none; }
@@ -600,6 +603,10 @@ async function loadGitHubDecks() {
     header.addEventListener('click', toggleGithubDropdown);
     header.addEventListener('touchend', toggleGithubDropdown, { passive: false });
 
+    // Impede que toques dentro do body fechem/abram o dropdown
+    body.addEventListener('touchend', e => e.stopPropagation(), { passive: true });
+    body.addEventListener('click', e => e.stopPropagation());
+
     csvFiles.forEach(file => {
       const card = document.createElement('div');
       card.className = 'github-deck-card';
@@ -608,7 +615,8 @@ async function loadGitHubDecks() {
         <span class="deck-name">${esc(file.name.replace('.csv', ''))}</span>
         <span class="deck-meta">importar ↓</span>
       `;
-      card.addEventListener('click', () => loadDeckFromGitHub(file.download_url, file.name, card));
+      card.addEventListener('click', e => { e.stopPropagation(); loadDeckFromGitHub(file.download_url, file.name, card); });
+      card.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); loadDeckFromGitHub(file.download_url, file.name, card); }, { passive: false });
       list.appendChild(card);
     });
   } catch (err) {
@@ -730,10 +738,18 @@ function renderLibrary() {
       <button class="folder-del" data-i="${i}" title="Excluir">✕</button>
     `;
     card.addEventListener('click', e => { if (!e.target.classList.contains('folder-del')) openFolder(i); });
+    card.addEventListener('touchend', e => {
+      if (e.target.classList.contains('folder-del')) return;
+      e.preventDefault(); openFolder(i);
+    }, { passive: false });
     card.querySelector('.folder-del').addEventListener('click', e => {
       e.stopPropagation();
       if (confirm(`Excluir "${f.name}"?`)) { folders.splice(i,1); save(); renderLibrary(); }
     });
+    card.querySelector('.folder-del').addEventListener('touchend', e => {
+      e.preventDefault(); e.stopPropagation();
+      if (confirm(`Excluir "${f.name}"?`)) { folders.splice(i,1); save(); renderLibrary(); }
+    }, { passive: false });
     grid.appendChild(card);
   });
 }
@@ -1264,31 +1280,4 @@ document.getElementById('btn-restart').addEventListener('click', () => startRoun
 
 document.getElementById('btn-retry-no').addEventListener('click', () => { if (noList.length) startRound(noList); });
 
-// ══════════════════════════════════════
-//  KEYBOARD
-// ══════════════════════════════════════
-document.addEventListener('keydown', e => {
-  if (!document.getElementById('screen-study').classList.contains('visible')) return;
-  if (document.getElementById('state-done').classList.contains('visible')) return;
-  if (opts.type) return;
-  if (e.key === 'ArrowLeft')  document.getElementById('btn-no').click();
-  if (e.key === 'ArrowRight') document.getElementById('btn-yes').click();
-  if (e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); flipCard(); }
-});
-
-// ══════════════════════════════════════
-//  UTILS
-// ══════════════════════════════════════
-function shuffle(arr) {
-  for (let i=arr.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
-  return arr;
-}
-
-window.speechSynthesis && window.speechSynthesis.addEventListener('voiceschanged', () => {});
-
-// ── INIT ──
-loadGitHubDecks();
-renderLibrary();
-</script>
-</body>
-</html>
+// ═════════════════════════════════════
