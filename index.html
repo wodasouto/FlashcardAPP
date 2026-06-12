@@ -822,6 +822,7 @@ function openFolder(idx) {
   startRound(getFilteredIndices());
 }
 
+
 function buildTagFilter() {
   const tags = [...new Set(deck.map(c => c.tag).filter(Boolean))];
   const row   = document.getElementById('tag-filter-row');
@@ -829,6 +830,50 @@ function buildTagFilter() {
   const trig  = document.getElementById('tag-trigger');
 
   if (tags.length === 0) { row.style.display = 'none'; return; }
+  row.style.display = 'block';
+  dd.innerHTML = '';
+
+  // Opção "Todas"
+  const allOpt = document.createElement('div');
+  allOpt.className = 'tag-opt tag-opt-all selected';
+  allOpt.dataset.tag = '__all__';
+  allOpt.innerHTML = `<span class="t-check"></span><span class="t-name">Todas as tags</span><span class="t-count">${deck.length}</span>`;
+  allOpt.addEventListener('click', e => { e.stopPropagation(); toggleTag('__all__'); });
+  allOpt.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); toggleTag('__all__'); }, { passive: false });
+  dd.appendChild(allOpt);
+
+  tags.forEach(tag => {
+    const count = deck.filter(c => c.tag === tag).length;
+    const opt   = document.createElement('div');
+    opt.className = 'tag-opt';
+    opt.dataset.tag = tag;
+    opt.innerHTML = `<span class="t-check"></span><span class="t-name">${esc(tag)}</span><span class="t-count">${count}</span>`;
+    opt.addEventListener('click', e => { e.stopPropagation(); toggleTag(tag); });
+    opt.addEventListener('touchend', e => { e.preventDefault(); e.stopPropagation(); toggleTag(tag); }, { passive: false });
+    dd.appendChild(opt);
+  });
+
+  // Toggle dropdown — compatível com iOS Safari
+  function toggleTagDropdown(e) {
+    e.preventDefault(); e.stopPropagation();
+    const isOpen = dd.classList.contains('open');
+    if (isOpen) { trig.classList.remove('open'); dd.classList.remove('open'); }
+    else        { trig.classList.add('open');    dd.classList.add('open'); }
+  }
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) trig.addEventListener('touchend', toggleTagDropdown, { passive: false });
+  else       trig.addEventListener('click', toggleTagDropdown);
+
+  // Fechar dropdown ao clicar fora
+  document.addEventListener('click', e => {
+    if (!trig.contains(e.target) && !dd.contains(e.target)) {
+      trig.classList.remove('open'); dd.classList.remove('open');
+    }
+  });
+
+  updateTagPreview();
+}
+
   row.style.display = 'block';
   dd.innerHTML = '';
 
